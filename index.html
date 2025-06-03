@@ -1,0 +1,20 @@
+from flask import Flask, render_template, request, redirect, session, url_for import json, os
+
+app = Flask(name) app.secret_key = 'swoxy_secret'
+
+USERS_FILE = 'data/users.json' CONTENT_FILE = 'data/content.json'
+
+Helper Functions
+
+def load_json(path): if not os.path.exists(path): return [] if 'content' in path else {} with open(path, 'r') as f: return json.load(f)
+
+def save_json(path, data): with open(path, 'w') as f: json.dump(data, f, indent=4)
+
+Routes
+
+@app.route('/') def index(): if 'user' in session: contents = load_json(CONTENT_FILE) return render_template('dashboard.html', contents=contents, user=session['user']) return redirect('/login')
+
+@app.route('/login', methods=['GET', 'POST']) def login(): if request.method == 'POST': users = load_json(USERS_FILE) username = request.form['username'] password = request.form['password'] if username in users and users[username] == password: session['user'] = username return redirect('/') return render_template('login.html', error='Geçersiz giriş') return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST']) def register(): if request.method == 'POST':
+
